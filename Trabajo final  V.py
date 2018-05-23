@@ -19,6 +19,10 @@ from skimage.color import rgb2gray
 from skimage.color import rgb2yiq, rgb2hsv, rgb2xyz, rgb2lab, rgb2ycbcr
 from skimage.filters import sobel_h, sobel_v,prewitt_h,prewitt_v,roberts
 from skimage.filters import threshold_otsu, threshold_adaptive
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import imshow, show, subplot, figure
 
 
 cantBuenasA = 17 # numero de imagenes buenas del lado A para entrenar
@@ -241,9 +245,9 @@ def border_thing2(img):
         img_g = gaussian(img_g, 3);
     
     img_prw = prewitt(img_g, mask = None);
-    figure();
-    imshow(img_prw, cmap = "gray");
-    title("prewitt");
+    #figure();
+    #imshow(img_prw, cmap = "gray");
+    #title("prewitt");
     '''
     fil, col, can = img.shape;
     for c in range(0, fil):
@@ -265,16 +269,16 @@ def border_thing2(img):
                 img_prw[c][j] = 0;'''
                 
     us_img = 255*(img_prw < 0.67).astype("uint8");
-    figure();
-    imshow(us_img, cmap = "gray");
-    title("umbralización");
+    #figure();
+    #imshow(us_img, cmap = "gray");
+    #title("umbralización");
     
     # conteo
     count = 0;
     fil, col, can = img.shape;
     for c in range(0, fil):
         for j in range(0, col):
-            if(img_prw[c][j] == 0):
+            if(us_img[c][j] == 0):
                 count += 1;
     
     return count;
@@ -291,16 +295,16 @@ def border_thing(Array, n):
             img_g = gaussian(img_g, 3);
         
         img_prw = prewitt(img_g, mask = None);
-        figure();
-        imshow(img_prw, cmap = "gray");
-        title("prewitt");
-        figure();
-        hist(img_prw.ravel(), 256, [0,256]);
+        #figure();
+        #imshow(img_prw, cmap = "gray");
+        #title("prewitt");
+        #figure();
+        #hist(img_prw.ravel(), 256, [0,256]);
         
         us_img = (255*img_prw < 0.67).astype("uint8");
         figure();
-        imshow(us_img, cmap = "gray");
-        title("umbralización");
+        #imshow(us_img, cmap = "gray");
+        #title("umbralización");
         
         # conteo
         count = 0;
@@ -313,3 +317,105 @@ def border_thing(Array, n):
         res.append(count);
         
     return res;
+
+def entrenar(cara):
+    
+    if (cara=="a"or cara=="A"):
+         malas,buenas=cargarimgA()
+         cropbuenas,cropmalas=CropA(malas,buenas)
+         bmala,bbuena=obtenerlabbA(cropmalas,cropbuenas)
+         brodmalas=border_thing(cropmalas,cantMalasA)
+         brodbuenas=border_thing(cropbuenas,cantBuenasA)
+         traindata=[]
+         responses=[]
+         for i in range(cantBuenasA):
+             traindata.append([bbuena[i],brodbuenas[i]])
+             responses.append(0)
+             
+         for i in range(cantMalasA):
+            traindata.append([bmala[i],brodmalas[i]])
+            responses.append(1)
+            
+
+         
+    elif (cara=="b" or cara=="B"):
+         malas,buenas=cargarimgB()
+         cropbuenas,cropmalas=CropB(malas,buenas)
+         bmala,bbuena=obtenerlabbB(cropmalas,cropbuenas)
+         brodmalas=border_thing(cropmalas,CantMalasB)
+         brodbuenas=border_thing(cropbuenas,cantBuenasB)
+         traindata=[]
+         responses=[]
+         for i in range(cantBuenasB):
+             traindata.append([bbuena[i],brodbuenas[i]])
+             responses.append(0)
+             
+         for i in range(CantMalasB):
+            traindata.append([bmala[i],brodmalas[i]])
+            responses.append(1)
+    Train=np.array(traindata).astype(np.float32)
+    respon=np.array(responses).astype(np.float32)
+    print(Train)
+    print(respon)
+    knn = cv.ml.KNearest_create()
+    knn.train(Train, cv.ml.ROW_SAMPLE, respon)
+        
+    return knn
+
+def clasificar(Knn,imagen):
+    img=imread(imagen)
+    cropimg=crop(img)
+    imgb=obtenerlab(cropimg)
+    brod=border_thing2(cropimg)
+    
+    newcomer=np.array([imgb,brod]).astype(np.float32)
+    ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 2)
+    
+    return results2
+
+
+
+print("ingrese una cara A=cara plana o B:cara curva")
+cara=input()
+
+print("ingrese el archivo incluyendo el .jpg este debe estar en la carpeta")
+imagen=input()
+
+print("porfavor espere el proceso puede tardar unos minutos")
+knn=entrenar(cara)
+respuesta=clasificar(knn,imagen)
+
+
+if (respuesta==0):
+    print("la imagen es buena")
+elif(respuesta==1):
+    
+    print("la imagen es mala")
+    
+
+
+
+
+    
+    
+    
+    
+    
+
+     
+
+            
+            
+             
+             
+         
+         
+         
+         
+         
+        
+        
+        
+    
+    
+
