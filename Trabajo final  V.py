@@ -302,7 +302,7 @@ def border_thing(Array, n):
         #hist(img_prw.ravel(), 256, [0,256]);
         
         us_img = (255*img_prw < 0.67).astype("uint8");
-        figure();
+        #figure();
         #imshow(us_img, cmap = "gray");
         #title("umbralización");
         
@@ -370,7 +370,7 @@ def clasificar(Knn,imagen):
     
     newcomer=np.array([[imgb,brod]]).astype(np.float32)
     print(newcomer)
-    ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 2)
+    ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 5)
     
     return results2
 
