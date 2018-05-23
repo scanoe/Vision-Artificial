@@ -194,17 +194,21 @@ def pruebacolor(img):
     title("ycbcr cr")
 
 
-def obtenerverdeA(Malas,Buenas):
+def obtenerlabbA(Malas,Buenas):
     aux1=[]
     for i in range(cantBuenasA):
-        aux1.append(Buenas[i][:,:,1])
-    BuenosverdeA=np.array(aux1)
+        img=rgb2lab(Buenas[i])[:,:,2]
+        aux1.append(np.median(img))
+    Buenoslabb=np.array(aux1)
     aux2=[]
-    for i in range(cantBuenasA):
-        aux2.append(Malas[i][:,:,1])
-    MalosverdeA=np.array(aux2)
+    for i in range(cantMalasA):
+        img=rgb2lab(Malas[i])[:,:,2]
+        aux2.append(np.median(img))
+    Maloslabb=np.array(aux2)
     
-    return MalosverdeA,BuenosverdeA
+    return Maloslabb,Buenoslabb
+
+
 
 
     
