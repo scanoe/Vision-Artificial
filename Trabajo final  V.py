@@ -368,7 +368,8 @@ def clasificar(Knn,imagen):
     imgb=obtenerlab(cropimg)
     brod=border_thing2(cropimg)
     
-    newcomer=np.array([imgb,brod]).astype(np.float32)
+    newcomer=np.array([[imgb,brod]]).astype(np.float32)
+    print(newcomer)
     ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 2)
     
     return results2
