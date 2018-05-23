@@ -208,6 +208,27 @@ def obtenerlabbA(Malas,Buenas):
     
     return Maloslabb,Buenoslabb
 
+def obtenerlabbB(Malas,Buenas):
+    aux1=[]
+    for i in range(cantBuenasB):
+        img=rgb2lab(Buenas[i])[:,:,2]
+        aux1.append(np.median(img))
+    Buenoslabb=np.array(aux1)
+    aux2=[]
+    for i in range(CantMalasB):
+        img=rgb2lab(Malas[i])[:,:,2]
+        aux2.append(np.median(img))
+    Maloslabb=np.array(aux2)
+    
+    return Maloslabb,Buenoslabb
+
+
+def obtenerlab(img):
+    img1=rgb2lab(img)[:,:,2]
+    media=np.median(img1)
+    return media
+
+    
 
 
 
