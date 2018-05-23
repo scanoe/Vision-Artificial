@@ -13,10 +13,12 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 from scipy.ndimage import imread
 from matplotlib.pyplot import imshow, show, subplot, figure
+from skimage.filters import gaussian, laplace, sobel_h, sobel_v, sobel, prewitt
 from matplotlib.pyplot import title, imsave, hist
 from skimage.color import rgb2gray
 from skimage.color import rgb2yiq, rgb2hsv, rgb2xyz, rgb2lab, rgb2ycbcr
 from skimage.filters import sobel_h, sobel_v,prewitt_h,prewitt_v,roberts
+from skimage.filters import threshold_otsu, threshold_adaptive
 
 
 cantBuenasA = 17 # numero de imagenes buenas del lado A para entrenar
@@ -228,19 +230,86 @@ def obtenerlab(img):
     media=np.median(img1)
     return media
 
+def border_thing2(img):
+    # Array ya está recortado
+    img = np.array(img, dtype=np.float64);
+    #img = img[1480:2700,2000:3200];
+    img_g = rgb2gray(img);
     
-
-
-
+    # aplicación de filtros
+    for c in range(0, 10):
+        img_g = gaussian(img_g, 3);
     
+    img_prw = prewitt(img_g, mask = None);
+    figure();
+    imshow(img_prw, cmap = "gray");
+    title("prewitt");
+    '''
+    fil, col, can = img.shape;
+    for c in range(0, fil):
+        for j in range(0, col):
+            if(img_prw[c][j] < 1):
+                img_prw[c][j] = 0;
+    
+    img_prw = img_prw*255;
+    figure();
+    imshow(img_prw, cmap = "gray");
+    title("prewitt después");'''
+    '''
+    fil, col, can = img.shape;
+    for c in range(0, fil):
+        for j in range(0, col):
+            if(img_prw[c][j] > 1):
+                img_prw[c][j] = 1;
+            else:
+                img_prw[c][j] = 0;'''
+                
+    us_img = 255*(img_prw < 0.67).astype("uint8");
+    figure();
+    imshow(us_img, cmap = "gray");
+    title("umbralización");
+    
+    # conteo
+    count = 0;
+    fil, col, can = img.shape;
+    for c in range(0, fil):
+        for j in range(0, col):
+            if(img_prw[c][j] == 0):
+                count += 1;
+    
+    return count;
+
+def border_thing(Array, n):
+    # Array ya está recortado
+    res = [];
+    for joder in range(n):
+        img = Array[joder];
+        img_g = rgb2gray(img);
         
+        # aplicación de filtros
+        for k in range(0, 10):
+            img_g = gaussian(img_g, 3);
         
-    
+        img_prw = prewitt(img_g, mask = None);
+        figure();
+        imshow(img_prw, cmap = "gray");
+        title("prewitt");
+        figure();
+        hist(img_prw.ravel(), 256, [0,256]);
         
-
-    
-    
-    
-    
-    
-    
+        us_img = (255*img_prw < 0.67).astype("uint8");
+        figure();
+        imshow(us_img, cmap = "gray");
+        title("umbralización");
+        
+        # conteo
+        count = 0;
+        fil, col, can = img.shape;
+        for c in range(0, fil):
+            for j in range(0, col):
+                if(us_img[c][j] == 0):
+                    count += 1;
+                    
+        res.append(count);
+        
+    return res;
