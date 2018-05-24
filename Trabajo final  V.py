@@ -370,7 +370,7 @@ def clasificar(Knn,imagen):
     
     newcomer=np.array([[imgb,brod]]).astype(np.float32)
     print(newcomer)
-    ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 5)
+    ret, results2, neighbours2 ,dist = Knn.findNearest(newcomer, 3)
     
     return results2
 
